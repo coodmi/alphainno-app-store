@@ -1,45 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Create a Supabase admin client for user creation
-function getSupabaseAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  
-  if (!url || !key) {
-    throw new Error('Supabase credentials are not configured');
-  }
-  
+function getSupabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   return createClient(url, key, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+    auth: { autoRefreshToken: false, persistSession: false }
   });
 }
 
-const supabaseAdmin = (() => {
-  try {
-    return getSupabaseAdminClient();
-  } catch (error) {
-    console.warn('Failed to initialize Supabase admin client:', error);
-    return null;
-  }
-})();
-
 export async function POST(request: NextRequest) {
   try {
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
-    }
-    
     const { email, code } = await request.json();
 
     if (!email || !code) {
       return NextResponse.json({ error: 'Email and code are required' }, { status: 400 });
     }
 
-    // Find the OTP code in the database
+    const supabaseAdmin = getSupabaseAdmin();
+
+    // 1. Find and validate OTP
     const { data: otpData, error: fetchError } = await supabaseAdmin
       .from('otp_codes')
       .select('*')
@@ -52,52 +32,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid OTP code' }, { status: 400 });
     }
 
-    // Check if the OTP has expired
-    const now = new Date();
-    const expiresAt = new Date(otpData.expires_at);
-    
-    if (now > expiresAt) {
+    if (new Date() > new Date(otpData.expires_at)) {
       return NextResponse.json({ error: 'OTP code has expired' }, { status: 400 });
     }
 
-    // Mark the OTP as verified
-    await supabaseAdmin
-      .from('otp_codes')
-      .update({ verified: true })
-      .eq('id', otpData.id);
+    // 2. Mark OTP as used
+    await supabaseAdmin.from('otp_codes').update({ verified: true }).eq('id', otpData.id);
 
-    // Check if user exists
+    // 3. Find or create user
     const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
-    let user = users.find(u => u.email === email);
+    let user = users.find((u: any) => u.email === email);
 
-    // Create user if doesn't exist
     if (!user) {
       const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email,
         email_confirm: true,
       });
-
       if (createError) {
         return NextResponse.json({ error: createError.message }, { status: 500 });
       }
-
       user = newUser.user;
     }
 
-    // Generate a session token for the user
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
+    // 4. Generate a magic link — client will use token_hash to establish session
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
-      email: email,
+      email,
     });
 
-    if (sessionError) {
-      return NextResponse.json({ error: sessionError.message }, { status: 500 });
+    if (linkError || !linkData?.properties?.hashed_token) {
+      return NextResponse.json({ error: linkError?.message || 'Failed to generate session' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
+      token_hash: linkData.properties.hashed_token,
       user,
-      redirectUrl: sessionData.properties?.action_link 
     });
   } catch (error: any) {
     console.error('Error verifying OTP:', error);
