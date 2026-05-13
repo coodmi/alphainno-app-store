@@ -70,7 +70,7 @@ export default function SignupPage() {
       
       setTimeout(() => {
         router.push("/user-dashboard");
-      }, 2000);
+      }, 1500);
     } catch (err: any) {
       setError(err.message || "Invalid OTP code");
       setOtp(["", "", "", "", "", ""]);

@@ -29,14 +29,6 @@ export default function UserDashboardPage() {
 
   useEffect(() => {
     const init = async () => {
-      // Check for demo user first
-      const demoUser = localStorage.getItem("demo-user");
-      if (demoUser) {
-        setUser(JSON.parse(demoUser));
-        setIsLoading(false);
-        return;
-      }
-
       const currentUser = await getCurrentUser();
 
       if (!currentUser) {
@@ -57,8 +49,6 @@ export default function UserDashboardPage() {
   }, [router]);
 
   const handleLogout = async () => {
-    // Clear demo user if exists
-    localStorage.removeItem("demo-user");
     await signOut();
     router.replace("/login");
   };

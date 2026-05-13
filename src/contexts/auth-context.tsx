@@ -1,83 +1,51 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { supabase } from "@/lib/supabase";
+import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  session: Session | null;
   isLoading: boolean;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // Simulate API call
-    setIsLoading(true);
-    try {
-      // Replace with actual API call
-      const mockUser = {
-        id: "1",
-        name: "User Name",
-        email: email,
-      };
-      setUser(mockUser);
-      localStorage.setItem("user", JSON.stringify(mockUser));
-    } catch (error) {
-      console.error("Login failed:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signup = async (name: string, email: string, password: string) => {
-    // Simulate API call
-    setIsLoading(true);
-    try {
-      // Replace with actual API call
-      const mockUser = {
-        id: "1",
-        name: name,
-        email: email,
-      };
-      setUser(mockUser);
-      localStorage.setItem("user", JSON.stringify(mockUser));
-    } catch (error) {
-      console.error("Signup failed:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("user");
+    setSession(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, session, isLoading, logout }}>
       {children}
     </AuthContext.Provider>
   );

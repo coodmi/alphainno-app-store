@@ -2,97 +2,67 @@ import { supabase } from './supabase';
 
 // Send OTP to email
 export const sendOTP = async (email: string): Promise<void> => {
-  try {
-    const response = await fetch('/api/auth/send-otp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    });
+  const response = await fetch('/api/auth/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to send OTP');
-    }
-  } catch (error: any) {
-    console.error('Error sending OTP:', error);
-    throw new Error(error.message || 'Failed to send OTP');
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to send OTP');
   }
 };
 
-// Verify OTP code
+// Verify OTP and establish Supabase session
 export const verifyOTP = async (email: string, token: string): Promise<any> => {
-  try {
-    const response = await fetch('/api/auth/verify-otp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, code: token }),
-    });
+  // 1. Verify the OTP code via our API (checks DB, creates/finds user, returns magic link)
+  const response = await fetch('/api/auth/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code: token }),
+  });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Invalid or expired OTP');
-    }
-
-    // If we got a redirect URL (magic link), use it to complete the sign in
-    if (data.redirectUrl) {
-      // Extract the token from the URL
-      const url = new URL(data.redirectUrl);
-      const tokenHash = url.searchParams.get('token_hash');
-      const type = url.searchParams.get('type');
-      
-      if (tokenHash && type) {
-        // Verify the OTP token with Supabase to create a session
-        const { data: sessionData, error: verifyError } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: type as any,
-        });
-        
-        if (verifyError) {
-          throw verifyError;
-        }
-        
-        return sessionData;
-      }
-    }
-
-    return data;
-  } catch (error: any) {
-    console.error('Error verifying OTP:', error);
-    throw new Error(error.message || 'Invalid or expired OTP');
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Invalid or expired OTP');
   }
+
+  // 2. Use the magic link token to establish a real Supabase session
+  if (data.redirectUrl) {
+    const url = new URL(data.redirectUrl);
+    const tokenHash = url.searchParams.get('token_hash');
+    const type = url.searchParams.get('type');
+
+    if (tokenHash && type) {
+      const { data: sessionData, error } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: type as any,
+      });
+
+      if (error) throw new Error(error.message);
+      return sessionData;
+    }
+  }
+
+  return data;
 };
 
 // Sign out
 export const signOut = async (): Promise<void> => {
-  try {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  } catch (error: any) {
-    console.error('Error signing out:', error);
-    throw new Error(error.message || 'Failed to sign out');
-  }
+  const { error } = await supabase.auth.signOut();
+  if (error) throw new Error(error.message);
 };
 
 // Get current user
 export const getCurrentUser = async () => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
-  } catch (error: any) {
-    console.error('Error getting user:', error);
-    return null;
-  }
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
 };
 
 // Listen to auth state changes
 export const onAuthStateChange = (callback: (user: any) => void) => {
-  return supabase.auth.onAuthStateChange((event: any, session: any) => {
+  return supabase.auth.onAuthStateChange((_event, session) => {
     callback(session?.user || null);
   });
 };
