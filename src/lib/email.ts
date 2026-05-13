@@ -18,7 +18,7 @@ export async function sendOTPEmail(email: string, code: string) {
     }
     
     await resend.emails.send({
-      from: 'Alphainno App Store <noreply@alphainno.com>',
+      from: 'Alphainno App Store <onboarding@resend.dev>',
       to: email,
       subject: 'Your verification code',
       html: `
