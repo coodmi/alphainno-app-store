@@ -18,7 +18,7 @@ export async function sendOTPEmail(email: string, code: string) {
     }
     
     await resend.emails.send({
-      from: 'Alphainno <onboarding@resend.dev>', // Update with your verified domain
+      from: 'Alphainno App Store <onboarding@resend.dev>',
       to: email,
       subject: 'Your verification code',
       html: `

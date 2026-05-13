@@ -16,21 +16,12 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isDemoMode, setIsDemoMode] = useState(false);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    
-    // Demo mode bypass
-    if (email === "demo@example.com") {
-      setIsDemoMode(true);
-      setStep("otp");
-      setIsLoading(false);
-      return;
-    }
-    
+
     try {
       await sendOTP(email);
       setStep("otp");
@@ -43,7 +34,7 @@ export default function LoginPage() {
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return;
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -64,7 +55,7 @@ export default function LoginPage() {
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const otpCode = otp.join("");
-    
+
     if (otpCode.length !== 6) {
       setError("Please enter the complete OTP");
       return;
@@ -72,20 +63,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     setError("");
-    
-    // Demo mode bypass - accept "123456" as valid OTP
-    if (isDemoMode && otpCode === "123456") {
-      // Create a demo session in localStorage
-      const demoUser = {
-        id: "demo-user-123",
-        email: "demo@example.com",
-        user_metadata: { name: "Demo User" }
-      };
-      localStorage.setItem("demo-user", JSON.stringify(demoUser));
-      router.push("/user-dashboard");
-      return;
-    }
-    
+
     try {
       await verifyOTP(email, otpCode);
       router.push("/user-dashboard");
@@ -101,7 +79,7 @@ export default function LoginPage() {
   const handleResendOtp = async () => {
     setIsLoading(true);
     setError("");
-    
+
     try {
       await sendOTP(email);
       setOtp(["", "", "", "", "", ""]);
@@ -133,27 +111,6 @@ export default function LoginPage() {
               <>
                 <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
                 <p className="text-gray-600 mb-6">Sign in to your account</p>
-
-                {/* Demo Info Banner */}
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-sm font-semibold text-blue-900 mb-1">Demo Account</h3>
-                      <p className="text-xs text-blue-700 mb-2">
-                        Use these credentials to explore the dashboard:
-                      </p>
-                      <div className="bg-white rounded px-3 py-2 text-xs font-mono">
-                        <div className="mb-1"><span className="text-gray-600">Email:</span> <span className="font-semibold">demo@example.com</span></div>
-                        <div><span className="text-gray-600">OTP:</span> <span className="font-semibold">123456</span></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
                 {error && (
                   <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
@@ -192,7 +149,7 @@ export default function LoginPage() {
                 </form>
 
                 <div className="mt-6 text-center text-sm text-gray-600">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <Link href="/signup" className="text-blue-600 font-medium hover:text-blue-700">
                     Sign up
                   </Link>
@@ -208,7 +165,8 @@ export default function LoginPage() {
                   </div>
                   <h1 className="text-2xl font-bold mb-2">Verify your email</h1>
                   <p className="text-gray-600">
-                    We sent a 6-digit code to <span className="font-medium text-gray-900">{email}</span>
+                    We sent a 6-digit code to{" "}
+                    <span className="font-medium text-gray-900">{email}</span>
                   </p>
                 </div>
 
@@ -252,7 +210,7 @@ export default function LoginPage() {
 
                 <div className="mt-6 text-center">
                   <p className="text-sm text-gray-600">
-                    Didn't receive the code?{" "}
+                    Didn&apos;t receive the code?{" "}
                     <button
                       onClick={handleResendOtp}
                       className="text-blue-600 font-medium hover:text-blue-700"
@@ -298,7 +256,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1">Passwordless Login</h3>
-                <p className="text-sm text-blue-100">Sign in quickly and securely with 6-digit OTP</p>
+                <p className="text-sm text-blue-100">Sign in quickly and securely with a 6-digit OTP</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -309,7 +267,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1">Enhanced Security</h3>
-                <p className="text-sm text-blue-100">Your account is protected with multi-factor authentication</p>
+                <p className="text-sm text-blue-100">Your account is protected with email-based authentication</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
