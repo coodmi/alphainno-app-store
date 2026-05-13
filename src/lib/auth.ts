@@ -11,25 +11,34 @@ export const sendOTP = async (email: string): Promise<void> => {
 };
 
 export const verifyOTP = async (email: string, token: string): Promise<any> => {
-  // 1. Verify OTP via API — returns hashed_token for session creation
   const response = await fetch('/api/auth/verify-otp', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, code: token }),
   });
-
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || 'Invalid or expired OTP');
-
-  // 2. Use the hashed token to establish a real browser session
-  const { error } = await supabase.auth.verifyOtp({
-    token_hash: data.token_hash,
-    type: 'magiclink',
-  });
-
-  if (error) throw new Error(error.message);
-
   return data;
+};
+
+export const signInWithPassword = async (email: string, password: string): Promise<void> => {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+};
+
+export const createAccount = async (params: {
+  email: string;
+  password: string;
+  name: string;
+  username: string;
+}): Promise<void> => {
+  const response = await fetch('/api/auth/create-account', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Failed to create account');
 };
 
 export const signOut = async (): Promise<void> => {

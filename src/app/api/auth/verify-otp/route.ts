@@ -36,39 +36,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'OTP code has expired' }, { status: 400 });
     }
 
-    // 2. Mark OTP as used
+    // 2. Mark OTP as verified
     await supabaseAdmin.from('otp_codes').update({ verified: true }).eq('id', otpData.id);
 
-    // 3. Find or create user
-    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
-    let user = users.find((u: any) => u.email === email);
-
-    if (!user) {
-      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        email_confirm: true,
-      });
-      if (createError) {
-        return NextResponse.json({ error: createError.message }, { status: 500 });
-      }
-      user = newUser.user;
-    }
-
-    // 4. Generate a magic link — client will use token_hash to establish session
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
-      email,
-    });
-
-    if (linkError || !linkData?.properties?.hashed_token) {
-      return NextResponse.json({ error: linkError?.message || 'Failed to generate session' }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      token_hash: linkData.properties.hashed_token,
-      user,
-    });
+    // 3. Return success only — account creation happens separately
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error verifying OTP:', error);
     return NextResponse.json({ error: error.message || 'Invalid or expired OTP' }, { status: 500 });
