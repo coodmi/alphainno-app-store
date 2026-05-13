@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { getCurrentUser, signOut } from "@/lib/auth";
 import UserSidebar from "@/components/user-sidebar";
-import { Package, Download, Play, Star, MoreVertical } from "lucide-react";
+import { Package, Download, Play, Star, MoreVertical, Palette, Code2, Shield, Mail, PenLine, LayoutDashboard } from "lucide-react";
 
 export default function LibraryPage() {
   const router = useRouter();
@@ -41,12 +41,12 @@ export default function LibraryPage() {
   };
 
   const library = [
-    { name: "DesignStudio", category: "Design", icon: "🎨", installed: true, size: "450 MB", rating: 4.9 },
-    { name: "CodeSmith", category: "Development", icon: "💻", installed: true, size: "320 MB", rating: 4.5 },
-    { name: "SecureVault", category: "Security", icon: "🔒", installed: true, size: "85 MB", rating: 4.7 },
-    { name: "OmniMail", category: "Communications", icon: "📧", installed: false, size: "120 MB", rating: 4.8 },
-    { name: "WriteFlow", category: "Writing", icon: "✍️", installed: true, size: "95 MB", rating: 4.7 },
-    { name: "Planify", category: "Productivity", icon: "📋", installed: true, size: "110 MB", rating: 4.6 },
+    { name: "DesignStudio", category: "Design", Icon: Palette, color: "bg-pink-100 text-pink-600", installed: true, size: "450 MB", rating: 4.9 },
+    { name: "CodeSmith", category: "Development", Icon: Code2, color: "bg-blue-100 text-blue-600", installed: true, size: "320 MB", rating: 4.5 },
+    { name: "SecureVault", category: "Security", Icon: Shield, color: "bg-green-100 text-green-600", installed: true, size: "85 MB", rating: 4.7 },
+    { name: "OmniMail", category: "Communications", Icon: Mail, color: "bg-indigo-100 text-indigo-600", installed: false, size: "120 MB", rating: 4.8 },
+    { name: "WriteFlow", category: "Writing", Icon: PenLine, color: "bg-orange-100 text-orange-600", installed: true, size: "95 MB", rating: 4.7 },
+    { name: "Planify", category: "Productivity", Icon: LayoutDashboard, color: "bg-teal-100 text-teal-600", installed: true, size: "110 MB", rating: 4.6 },
   ];
 
   if (isLoading) {
@@ -77,7 +77,9 @@ export default function LibraryPage() {
                 className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center gap-4">
-                  <div className="text-5xl">{app.icon}</div>
+                  <div className={`p-3 rounded-xl flex-shrink-0 ${app.color}`}>
+                    <app.Icon className="w-8 h-8" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900 text-lg">{app.name}</h3>
                     <p className="text-sm text-gray-600">{app.category}</p>

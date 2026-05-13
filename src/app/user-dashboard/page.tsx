@@ -19,7 +19,14 @@ import {
   Gamepad2,
   Film,
   Sparkles,
-  ArrowUpRight
+  ArrowUpRight,
+  Palette,
+  Code2,
+  Shield,
+  Mail,
+  PenLine,
+  LayoutDashboard,
+  Zap
 } from "lucide-react";
 
 export default function UserDashboardPage() {
@@ -72,16 +79,16 @@ export default function UserDashboardPage() {
   ];
 
   const recentActivity = [
-    { name: "DesignStudio", action: "Downloaded", time: "2 hours ago", icon: "🎨" },
-    { name: "CodeSmith", action: "Purchased", time: "1 day ago", icon: "💻" },
-    { name: "SecureVault", action: "Updated", time: "3 days ago", icon: "🔒" },
-    { name: "Cyber Tactics", action: "Played", time: "5 days ago", icon: "🎮" },
+    { name: "DesignStudio", action: "Downloaded", time: "2 hours ago", Icon: Palette, color: "bg-pink-100 text-pink-600" },
+    { name: "CodeSmith", action: "Purchased", time: "1 day ago", Icon: Code2, color: "bg-blue-100 text-blue-600" },
+    { name: "SecureVault", action: "Updated", time: "3 days ago", Icon: Shield, color: "bg-green-100 text-green-600" },
+    { name: "Cyber Tactics", action: "Played", time: "5 days ago", Icon: Gamepad2, color: "bg-purple-100 text-purple-600" },
   ];
 
   const recommendations = [
-    { name: "WriteFlow", category: "Writing", price: "$2.99", rating: 4.7, image: "✍️" },
-    { name: "Planify", category: "Productivity", price: "Free", rating: 4.6, image: "📋" },
-    { name: "Apex Drift", category: "Racing", price: "$29.99", rating: 4.8, image: "🏎️" },
+    { name: "WriteFlow", category: "Writing", price: "$2.99", rating: 4.7, Icon: PenLine, color: "bg-orange-100 text-orange-600" },
+    { name: "Planify", category: "Productivity", price: "Free", rating: 4.6, Icon: LayoutDashboard, color: "bg-teal-100 text-teal-600" },
+    { name: "Apex Drift", category: "Racing", price: "$29.99", rating: 4.8, Icon: Zap, color: "bg-yellow-100 text-yellow-600" },
   ];
 
   return (
@@ -208,7 +215,9 @@ export default function UserDashboardPage() {
               <div className="space-y-4">
                 {recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <div className="text-2xl">{activity.icon}</div>
+                    <div className={`p-2 rounded-lg flex-shrink-0 ${activity.color}`}>
+                      <activity.Icon className="w-4 h-4" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">
                         {activity.name}
@@ -244,7 +253,9 @@ export default function UserDashboardPage() {
                   className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer group"
                 >
                   <div className="flex items-start gap-3 mb-3">
-                    <div className="text-4xl">{app.image}</div>
+                    <div className={`p-3 rounded-xl flex-shrink-0 ${app.color}`}>
+                      <app.Icon className="w-6 h-6" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
                         {app.name}

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { getCurrentUser, signOut } from "@/lib/auth";
 import UserSidebar from "@/components/user-sidebar";
-import { Download, CheckCircle, XCircle, Clock, Pause, Play } from "lucide-react";
+import { Download, CheckCircle, Clock, Pause, Play, Palette, Code2, Shield, Mail } from "lucide-react";
 
 export default function DownloadsPage() {
   const router = useRouter();
@@ -41,10 +41,10 @@ export default function DownloadsPage() {
   };
 
   const downloads = [
-    { name: "DesignStudio", icon: "🎨", status: "completed", progress: 100, size: "450 MB", speed: "" },
-    { name: "CodeSmith", icon: "💻", status: "downloading", progress: 65, size: "320 MB", speed: "5.2 MB/s" },
-    { name: "SecureVault", icon: "🔒", status: "paused", progress: 30, size: "85 MB", speed: "" },
-    { name: "OmniMail", icon: "📧", status: "queued", progress: 0, size: "120 MB", speed: "" },
+    { name: "DesignStudio", Icon: Palette, color: "bg-pink-100 text-pink-600", status: "completed", progress: 100, size: "450 MB", speed: "" },
+    { name: "CodeSmith", Icon: Code2, color: "bg-blue-100 text-blue-600", status: "downloading", progress: 65, size: "320 MB", speed: "5.2 MB/s" },
+    { name: "SecureVault", Icon: Shield, color: "bg-green-100 text-green-600", status: "paused", progress: 30, size: "85 MB", speed: "" },
+    { name: "OmniMail", Icon: Mail, color: "bg-indigo-100 text-indigo-600", status: "queued", progress: 0, size: "120 MB", speed: "" },
   ];
 
   if (isLoading) {
@@ -75,7 +75,9 @@ export default function DownloadsPage() {
                 className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
               >
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="text-4xl">{download.icon}</div>
+                  <div className={`p-3 rounded-xl flex-shrink-0 ${download.color}`}>
+                    <download.Icon className="w-6 h-6" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-semibold text-gray-900">{download.name}</h3>

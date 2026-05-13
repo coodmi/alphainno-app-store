@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { getCurrentUser, signOut } from "@/lib/auth";
 import UserSidebar from "@/components/user-sidebar";
-import { Heart, Star, ShoppingBag, X } from "lucide-react";
+import { Heart, Star, ShoppingBag, X, PenLine, LayoutDashboard, Zap, Sword, Wind } from "lucide-react";
 
 export default function WishlistPage() {
   const router = useRouter();
@@ -41,11 +41,11 @@ export default function WishlistPage() {
   };
 
   const wishlist = [
-    { name: "WriteFlow", category: "Writing", icon: "✍️", price: "$2.99", rating: 4.7, onSale: false },
-    { name: "Planify", category: "Productivity", icon: "📋", price: "Free", rating: 4.6, onSale: false },
-    { name: "Apex Drift", category: "Racing", icon: "🏎️", price: "$29.99", originalPrice: "$39.99", rating: 4.8, onSale: true },
-    { name: "Neon Knight", category: "Action", icon: "⚔️", price: "$14.99", rating: 4.5, onSale: false },
-    { name: "Ghost Runner", category: "Parkour", icon: "🏃", price: "$9.99", originalPrice: "$14.99", rating: 4.4, onSale: true },
+    { name: "WriteFlow", category: "Writing", Icon: PenLine, color: "bg-orange-100 text-orange-600", price: "$2.99", rating: 4.7, onSale: false },
+    { name: "Planify", category: "Productivity", Icon: LayoutDashboard, color: "bg-teal-100 text-teal-600", price: "Free", rating: 4.6, onSale: false },
+    { name: "Apex Drift", category: "Racing", Icon: Zap, color: "bg-yellow-100 text-yellow-600", price: "$29.99", originalPrice: "$39.99", rating: 4.8, onSale: true },
+    { name: "Neon Knight", category: "Action", Icon: Sword, color: "bg-red-100 text-red-600", price: "$14.99", rating: 4.5, onSale: false },
+    { name: "Ghost Runner", category: "Parkour", Icon: Wind, color: "bg-purple-100 text-purple-600", price: "$9.99", originalPrice: "$14.99", rating: 4.4, onSale: true },
   ];
 
   if (isLoading) {
@@ -76,7 +76,7 @@ export default function WishlistPage() {
                 className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative group"
               >
                 {item.onSale && (
-                  <div className="absolute top-4 right-4 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
+                  <div className="absolute top-4 left-4 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
                     SALE
                   </div>
                 )}
@@ -85,7 +85,9 @@ export default function WishlistPage() {
                   <X className="w-4 h-4 text-red-500" />
                 </button>
 
-                <div className="text-5xl mb-4">{item.icon}</div>
+                <div className={`p-4 rounded-xl mb-4 w-fit ${item.color}`}>
+                  <item.Icon className="w-8 h-8" />
+                </div>
                 
                 <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
                 <p className="text-sm text-gray-600 mb-3">{item.category}</p>
